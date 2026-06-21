@@ -11,6 +11,8 @@
         .btn-grid { display: grid; gap: 15px; margin-top: 20px; }
         button { padding: 15px; cursor: pointer; border: none; border-radius: 20px; background: #fff5f7; color: #ff8fa3; font-family: 'Kanit'; font-weight: 600; transition: all 0.3s; border: 2px solid #ffccd5; }
         button:hover { background: #ffccd5; color: white; transform: translateY(-3px); }
+        /* สไตล์ปุ่มเปิดปิดเพลง */
+        #music-btn { margin-bottom: 20px; padding: 10px 20px; font-size: 14px; }
         #status { margin-top: 20px; font-weight: bold; color: #ff8fa3; font-size: 1.1em; }
         input { padding: 10px; border-radius: 10px; border: 2px solid #ffccd5; width: 80%; margin-bottom: 10px; font-family: 'Kanit'; }
         .lb-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #ffccd5; padding: 5px; }
@@ -23,6 +25,7 @@
 </audio>
 
 <div id="game-box">
+    <button id="music-btn" onclick="toggleMusic()">🔊 เปิด/ปิด เพลง</button>
     <h1>URINARY QUEST 💧</h1>
     <div id="output">
         <p>ใส่ชื่อของคุณเพื่อเริ่มผจญภัย!</p>
@@ -36,6 +39,18 @@
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_t8A53gWq0F3TKu8l8o63dJ6SCYl6Cp_lvHv8eLtHHOKaKrmUPa-_NnnkpuOLM72MMA/exec"; 
+  
+  // ตั้งค่าเพลง
+  const audio = document.getElementById("bgMusic");
+  audio.volume = 0.3; // ระดับเสียง 30%
+
+  function toggleMusic() {
+      if (audio.paused) {
+          audio.play();
+      } else {
+          audio.pause();
+      }
+  }
 
   let stage = 0; let hp = 3; let score = 0; let playerName = ""; let startTime = 0;
   const questions = [
@@ -71,51 +86,10 @@
       playerName = document.getElementById("playerName").value;
       if (!playerName) { alert("กรุณาใส่ชื่อ!"); return; }
       
-      // สั่งให้เพลงเล่นเมื่อเริ่มเกม
-      const audio = document.getElementById("bgMusic");
-      audio.play();
-
+      audio.play(); // เริ่มเล่นเพลง
       stage = 0; hp = 3; score = 0;
       showQuestion();
   }
 
   function showQuestion() {
-    if (hp <= 0 || stage >= questions.length) {
-        let finalScore = score + (hp * 10);
-        document.getElementById('output').innerHTML = "⏳ กำลังบันทึกคะแนน...";
-        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ name: playerName, score: finalScore }) })
-        .then(() => {
-            document.getElementById('output').innerHTML = `🌟 จบเกม! ${playerName}<br>คะแนน: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button><div id="leaderboard"></div>`;
-            fetchLeaderboard();
-        });
-        return;
-    }
-    startTime = Date.now();
-    let q = questions[stage];
-    let html = `<p>${q.q}</p><div class="btn-grid">`;
-    q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
-    document.getElementById('output').innerHTML = html + `</div>`;
-    document.getElementById('status').innerText = "HP: " + "💖".repeat(hp) + " | Score: " + score;
-  }
-
-  function answer(i) {
-    let q = questions[stage];
-    let isCorrect = (i === q.ans);
-    let timeTaken = (Date.now() - startTime) / 1000;
-    
-    if (isCorrect) {
-        let bonus = Math.max(0, 10 - Math.floor(timeTaken)); 
-        let points = 25 + (bonus * 5);
-        score += points;
-        document.getElementById('output').innerHTML = `<p>✅ ถูกต้อง! (+${points} คะแนน)</p>`;
-    } else {
-        hp -= 1;
-        document.getElementById('output').innerHTML = `<p>❌ ผิดน้า... ตอบ: ${q.options[q.ans]}</p>`;
-    }
-    setTimeout(() => { stage++; showQuestion(); }, 1500);
-  }
-
-  window.onload = fetchLeaderboard;
-</script>
-</body>
-</html>
+    if (hp <= 0
