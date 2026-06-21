@@ -18,6 +18,10 @@
 </head>
 <body>
 
+<audio id="bgMusic" loop>
+    <source src="ใส่_URL_ไฟล์เพลงของคุณที่นี่.mp3" type="audio/mpeg">
+</audio>
+
 <div id="game-box">
     <h1>URINARY QUEST 💧</h1>
     <div id="output">
@@ -31,7 +35,6 @@
 </div>
 
 <script>
-  // --- เปลี่ยน URL ตรงนี้เป็นลิงก์ Web App ของคุณ ---
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_t8A53gWq0F3TKu8l8o63dJ6SCYl6Cp_lvHv8eLtHHOKaKrmUPa-_NnnkpuOLM72MMA/exec"; 
 
   let stage = 0; let hp = 3; let score = 0; let playerName = ""; let startTime = 0;
@@ -67,6 +70,11 @@
   function startGame() {
       playerName = document.getElementById("playerName").value;
       if (!playerName) { alert("กรุณาใส่ชื่อ!"); return; }
+      
+      // สั่งให้เพลงเล่นเมื่อเริ่มเกม
+      const audio = document.getElementById("bgMusic");
+      audio.play();
+
       stage = 0; hp = 3; score = 0;
       showQuestion();
   }
@@ -82,7 +90,7 @@
         });
         return;
     }
-    startTime = Date.now(); // บันทึกเวลาเริ่มข้อ
+    startTime = Date.now();
     let q = questions[stage];
     let html = `<p>${q.q}</p><div class="btn-grid">`;
     q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
