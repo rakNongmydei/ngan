@@ -5,38 +5,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
     <title>Cute Urinary Quest 💧</title>
     <style>
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            text-align: center; 
-            background-color: #fff0f5; 
-            padding: 20px; 
-            color: #ff8fa3; 
-        }
-        #game-box { 
-            background: #ffffff; 
-            padding: 40px; 
-            border-radius: 40px; 
-            max-width: 450px; 
-            margin: auto; 
-            border: 6px solid #ffccd5; 
-            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.5); 
-        }
+        body { font-family: 'Kanit', sans-serif; text-align: center; background-color: #fff0f5; padding: 20px; color: #ff8fa3; }
+        #game-box { background: #ffffff; padding: 40px; border-radius: 40px; max-width: 450px; margin: auto; border: 6px solid #ffccd5; box-shadow: 0 10px 25px rgba(255, 182, 193, 0.5); }
         h1 { font-size: 26px; margin-bottom: 20px; color: #ff6b8b; }
         .btn-grid { display: grid; gap: 15px; margin-top: 20px; }
-        button { 
-            padding: 15px; 
-            cursor: pointer; 
-            border: none; 
-            border-radius: 20px; 
-            background: #fff5f7; 
-            color: #ff8fa3; 
-            font-family: 'Kanit'; 
-            font-weight: 600;
-            transition: all 0.3s; 
-            border: 2px solid #ffccd5;
-        }
+        button { padding: 15px; cursor: pointer; border: none; border-radius: 20px; background: #fff5f7; color: #ff8fa3; font-family: 'Kanit'; font-weight: 600; transition: all 0.3s; border: 2px solid #ffccd5; }
         button:hover { background: #ffccd5; color: white; transform: translateY(-3px); }
         #status { margin-top: 20px; font-weight: bold; color: #ff8fa3; font-size: 1.1em; }
+        input { padding: 10px; border-radius: 10px; border: 2px solid #ffccd5; width: 80%; margin-bottom: 10px; font-family: 'Kanit'; }
     </style>
 </head>
 <body>
@@ -44,23 +20,17 @@
 <div id="game-box">
     <h1>URINARY QUEST 💧</h1>
     <div id="output">
-        <p>พร้อมผจญภัยกับโมเลกุลน้ำจิ๋วหรือยังคะ?</p>
+        <p>ใส่ชื่อของคุณก่อนผจญภัยกับโมเลกุลน้ำจิ๋ว!</p>
+        <input type="text" id="playerName" placeholder="พิมพ์ชื่อที่นี่...">
+        <br>
         <button onclick="startGame()">เริ่มเล่นเล้ย!</button>
+        <div id="leaderboard" style="margin-top: 20px; text-align: left; font-size: 0.9em;"></div>
     </div>
     <div id="status"></div>
-    <div style="margin-top: 20px;">
-        <button onclick="toggleMusic()">🎵 เพลง</button>
-        <button onclick="changeVolume(-0.1)">🔊 -</button>
-        <button onclick="changeVolume(0.1)">🔊 +</button>
-    </div>
 </div>
 
-<audio id="bgMusic" loop>
-    <source src="game_music.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-  let stage = 0; let hp = 3; let score = 0;
+  let stage = 0; let hp = 3; let score = 0; let playerName = "";
   const questions = [
     { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
     { q: "ท่อที่นำปัสสาวะไปกระเพาะปัสสาวะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
@@ -76,17 +46,33 @@
     { q: "พฤติกรรมใดช่วยลดความเสี่ยงโรคนิ่ว?", options: ["ดื่มน้ำสะอาดเยอะๆ", "กินเค็ม", "งดผัก", "อั้นปัสสาวะนานๆ"], ans: 0 }
   ];
 
-  function toggleMusic() { let m = document.getElementById("bgMusic"); m.paused ? m.play() : m.pause(); }
-  function changeVolume(v) { let m = document.getElementById("bgMusic"); m.volume = Math.min(Math.max(m.volume + v, 0), 1); }
-  function startGame() { stage = 0; hp = 3; score = 0; 
-                        let music = document.getElementById("bgMusic");
-                        music.play().catch(error => console.log("รอการคลิกจากผู้ใช้"));
-                        showQuestion(); }
-  
+  function showLeaderboard() {
+      let highScores = JSON.parse(localStorage.getItem("scores")) || [];
+      let html = `<h3>🏆 อันดับคะแนนสูงสุด</h3>`;
+      highScores.sort((a, b) => b.score - a.score).slice(0, 5).forEach((s, i) => {
+          html += `<p>${i+1}. ${s.name} - ${s.score} คะแนน</p>`;
+      });
+      document.getElementById('leaderboard').innerHTML = html;
+  }
+
+  function startGame() {
+      playerName = document.getElementById("playerName").value;
+      if (!playerName) { alert("ใส่ชื่อก่อนนะ!"); return; }
+      stage = 0; hp = 3; score = 0;
+      showQuestion();
+  }
+
   function showQuestion() {
-    if (hp <= 0) { document.getElementById('output').innerHTML = "💀 จบเกมแล้ว! คะแนน: " + score + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
-    if (stage >= questions.length) { document.getElementById('output').innerHTML = "🌟 ยอดเยี่ยม! คะแนน: " + (score + (hp * 10)) + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
-    
+    if (hp <= 0 || stage >= questions.length) {
+        let finalScore = score + (hp * 10);
+        let highScores = JSON.parse(localStorage.getItem("scores")) || [];
+        highScores.push({ name: playerName, score: finalScore });
+        localStorage.setItem("scores", JSON.stringify(highScores));
+        
+        document.getElementById('output').innerHTML = `💀 จบเกม! ${playerName}<br>คะแนนของคุณ: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button>`;
+        showLeaderboard();
+        return;
+    }
     let q = questions[stage];
     let html = `<p>${q.q}</p><div class="btn-grid">`;
     q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
@@ -97,21 +83,13 @@
   function answer(i) {
     let q = questions[stage];
     let isCorrect = (i === q.ans);
-    
-    // แสดงผลเฉลย
-    let message = isCorrect ? "✅ ถูกต้องนะ!" : "❌ ผิดน้า... คำตอบที่ถูกคือ: " + q.options[q.ans];
+    let message = isCorrect ? "✅ ถูกต้องนะ!" : "❌ ผิดน้า... คำตอบคือ: " + q.options[q.ans];
     document.getElementById('output').innerHTML = `<p>${message}</p>`;
-
-    // ปรับคะแนน/HP
     if (isCorrect) score += 25; else hp -= 1;
-    
-    // หน่วงเวลา 1.5 วินาทีก่อนไปข้อถัดไป
-    setTimeout(() => {
-        stage++;
-        showQuestion();
-    }, 2000);
+    setTimeout(() => { stage++; showQuestion(); }, 2000);
   }
-</script>
 
+  window.onload = showLeaderboard;
+</script>
 </body>
 </html>
