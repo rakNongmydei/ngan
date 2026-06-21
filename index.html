@@ -2,12 +2,16 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
     <title>Cute Urinary Quest 💧</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #ffeef2; padding: 20px; }
-        #game-box { background: white; padding: 20px; border-radius: 20px; max-width: 400px; margin: auto; border: 3px solid #ffb7c5; }
-        .btn-grid { display: grid; gap: 10px; margin-top: 15px; }
-        button { padding: 10px; cursor: pointer; }
+        body { font-family: 'Kanit', sans-serif; text-align: center; background: #fff5f7; padding: 20px; color: #ff6b8b; }
+        #game-box { background: white; padding: 30px; border-radius: 30px; max-width: 400px; margin: auto; border: 5px solid #ffccd5; box-shadow: 0 10px 20px rgba(255,182,193,0.4); }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #ff4d6d; }
+        .btn-grid { display: grid; gap: 12px; margin-top: 20px; }
+        button { padding: 12px; cursor: pointer; border: none; border-radius: 15px; background: #ffe4e6; color: #ff4d6d; font-family: 'Kanit'; transition: 0.3s; }
+        button:hover { background: #ffb7c5; color: white; }
+        #status { margin-top: 20px; font-weight: bold; color: #ff85a2; }
     </style>
 </head>
 <body>
@@ -15,24 +19,23 @@
 <div id="game-box">
     <h1>URINARY QUEST 💧</h1>
     <div id="output">
-        <p class="q-box">พร้อมผจญภัยกับโมเลกุลน้ำจิ๋วหรือยังคะ?</p>
+        <p>พร้อมผจญภัยกับโมเลกุลน้ำจิ๋วหรือยังคะ?</p>
         <button onclick="startGame()">เริ่มเล่นเล้ย!</button>
     </div>
     <div id="status"></div>
-    <br>
-    <button onclick="toggleMusic()">🎵 เปิด/ปิด เพลง</button>
-    <button onclick="changeVolume(-0.1)">🔊 -</button>
-    <button onclick="changeVolume(0.1)">🔊 +</button>
+    <div style="margin-top: 20px;">
+        <button onclick="toggleMusic()">🎵 เพลง</button>
+        <button onclick="changeVolume(-0.1)">🔊 -</button>
+        <button onclick="changeVolume(0.1)">🔊 +</button>
+    </div>
 </div>
 
 <audio id="bgMusic" loop>
-    <source src="game_music.mp3" type="audio/mpeg">
+    <source src="winter-pixel-422896.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-  let stage = 0;
-  let hp = 3;
-  let score = 0;
+  let stage = 0; let hp = 3; let score = 0;
   const questions = [
     { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
     { q: "ท่อที่นำปัสสาวะไปกระเพาะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
@@ -45,51 +48,19 @@
     { q: "ดื่มน้ำน้อยเสี่ยงเป็นโรคอะไร?", options: ["นิ่วในไต", "เบาหวาน", "กระดูกพรุน", "ตับอักเสบ"], ans: 0 }
   ];
 
-  function toggleMusic() {
-    let music = document.getElementById("bgMusic");
-    music.paused ? music.play() : music.pause();
-  }
-
-  function changeVolume(amount) {
-    let music = document.getElementById("bgMusic");
-    let newVolume = music.volume + amount;
-    if (newVolume > 1) newVolume = 1;
-    if (newVolume < 0) newVolume = 0;
-    music.volume = newVolume;
-  }
-
-  function startGame() {
-    stage = 0;
-    hp = 3;
-    score = 0;
-    showQuestion();
-  }
-
+  function toggleMusic() { let m = document.getElementById("bgMusic"); m.paused ? m.play() : m.pause(); }
+  function changeVolume(v) { let m = document.getElementById("bgMusic"); m.volume = Math.min(Math.max(m.volume + v, 0), 1); }
+  function startGame() { stage = 0; hp = 3; score = 0; showQuestion(); }
   function showQuestion() {
-    if (hp <= 0) {
-      document.getElementById('output').innerHTML = "💀 โอ๊ะโอ! พลังชีวิตหมดแล้ว<br>คะแนนรวม: " + score + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
-      return;
-    }
-    if (stage >= questions.length) {
-      document.getElementById('output').innerHTML = "🌟 ยินดีด้วยค่ะ! เก่งมาก<br>คะแนนรวม: " + (score + (hp * 10)) + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
-      return;
-    }
-    let qData = questions[stage];
-    let html = `<p class="q-box">${qData.q}</p><div class="btn-grid">`;
-    qData.options.forEach((opt, i) => {
-      html += `<button onclick="answer(${i})">${opt}</button>`;
-    });
-    html += `</div>`;
-    document.getElementById('output').innerHTML = html;
-    document.getElementById('status').innerText = "HP: " + "❤️".repeat(hp) + " | Score: " + score;
+    if (hp <= 0) { document.getElementById('output').innerHTML = "💀 จบเกมแล้ว! คะแนน: " + score + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
+    if (stage >= questions.length) { document.getElementById('output').innerHTML = "🌟 ยอดเยี่ยม! คะแนน: " + (score + (hp * 10)) + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
+    let q = questions[stage];
+    let html = `<p>${q.q}</p><div class="btn-grid">`;
+    q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
+    document.getElementById('output').innerHTML = html + `</div>`;
+    document.getElementById('status').innerText = "HP: " + "💖".repeat(hp) + " | Score: " + score;
   }
-
-  function answer(idx) {
-    if (idx === questions[stage].ans) score += 25;
-    else hp -= 1;
-    stage++;
-    showQuestion();
-  }
+  function answer(i) { if (i === questions[stage].ans) score += 25; else hp -= 1; stage++; showQuestion(); }
 </script>
 
 </body>
