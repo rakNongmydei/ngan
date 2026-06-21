@@ -28,10 +28,6 @@
   }
 
   function startGame() {
-    // สั่งให้เพลงเล่นทันทีเมื่อกดปุ่มเริ่ม
-    let music = document.getElementById("bgMusic");
-    music.play().catch(error => console.log("รอการโต้ตอบจากผู้ใช้ก่อนเริ่มเพลง"));
-    
     stage = 0;
     hp = 3;
     score = 0;
