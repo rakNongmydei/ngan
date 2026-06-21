@@ -13,6 +13,7 @@
         button:hover { background: #ffccd5; color: white; transform: translateY(-3px); }
         #status { margin-top: 20px; font-weight: bold; color: #ff8fa3; font-size: 1.1em; }
         input { padding: 10px; border-radius: 10px; border: 2px solid #ffccd5; width: 80%; margin-bottom: 10px; font-family: 'Kanit'; }
+        .lb-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #ffccd5; padding: 5px; }
     </style>
 </head>
 <body>
@@ -20,16 +21,19 @@
 <div id="game-box">
     <h1>URINARY QUEST 💧</h1>
     <div id="output">
-        <p>ใส่ชื่อของคุณก่อนผจญภัยกับโมเลกุลน้ำจิ๋ว!</p>
+        <p>ใส่ชื่อของคุณเพื่อเริ่มผจญภัย!</p>
         <input type="text" id="playerName" placeholder="พิมพ์ชื่อที่นี่...">
         <br>
         <button onclick="startGame()">เริ่มเล่นเล้ย!</button>
-        <div id="leaderboard" style="margin-top: 20px; text-align: left; font-size: 0.9em;"></div>
+        <div id="leaderboard" style="margin-top:20px; text-align:left;">กำลังโหลดคะแนนออนไลน์...</div>
     </div>
     <div id="status"></div>
 </div>
 
 <script>
+  // บรรทัดข้างล่างนี้: ให้เอา URL ที่ได้จาก Google Apps Script มาใส่ครับ
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysKlWGeikeU2qkkDxKXDcxLHBqqQkn2y76d96zv0SVhBYTWCQIi-P23QlXFOy1RpBknw/exec"; 
+
   let stage = 0; let hp = 3; let score = 0; let playerName = "";
   const questions = [
     { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
@@ -46,18 +50,24 @@
     { q: "พฤติกรรมใดช่วยลดความเสี่ยงโรคนิ่ว?", options: ["ดื่มน้ำสะอาดเยอะๆ", "กินเค็ม", "งดผัก", "อั้นปัสสาวะนานๆ"], ans: 0 }
   ];
 
-  function showLeaderboard() {
-      let highScores = JSON.parse(localStorage.getItem("scores")) || [];
-      let html = `<h3>🏆 อันดับคะแนนสูงสุด</h3>`;
-      highScores.sort((a, b) => b.score - a.score).slice(0, 5).forEach((s, i) => {
-          html += `<p>${i+1}. ${s.name} - ${s.score} คะแนน</p>`;
-      });
-      document.getElementById('leaderboard').innerHTML = html;
+  // ฟังก์ชันดึงคะแนนออนไลน์
+  function fetchLeaderboard() {
+      fetch(SCRIPT_URL)
+      .then(res => res.json())
+      .then(data => {
+          let scores = data.map(d => ({ name: d[0], score: d[1] }));
+          scores.sort((a, b) => b.score - a.score);
+          let html = "<h3>🌍 อันดับออนไลน์ (Top 5)</h3>";
+          scores.slice(0, 5).forEach((s, i) => {
+              html += `<div class="lb-item"><span>${i+1}. ${s.name}</span> <span>${s.score}</span></div>`;
+          });
+          document.getElementById('leaderboard').innerHTML = html;
+      }).catch(err => document.getElementById('leaderboard').innerHTML = "โหลดคะแนนไม่สำเร็จ");
   }
 
   function startGame() {
       playerName = document.getElementById("playerName").value;
-      if (!playerName) { alert("ใส่ชื่อก่อนนะ!"); return; }
+      if (!playerName) { alert("กรุณาใส่ชื่อ!"); return; }
       stage = 0; hp = 3; score = 0;
       showQuestion();
   }
@@ -65,12 +75,16 @@
   function showQuestion() {
     if (hp <= 0 || stage >= questions.length) {
         let finalScore = score + (hp * 10);
-        let highScores = JSON.parse(localStorage.getItem("scores")) || [];
-        highScores.push({ name: playerName, score: finalScore });
-        localStorage.setItem("scores", JSON.stringify(highScores));
+        document.getElementById('output').innerHTML = "⏳ กำลังบันทึกคะแนนออนไลน์...";
         
-        document.getElementById('output').innerHTML = `💀 จบเกม! ${playerName}<br>คะแนนของคุณ: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button>`;
-        showLeaderboard();
+        // ส่งคะแนนไป Google Sheets
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ name: playerName, score: finalScore })
+        }).then(() => {
+            document.getElementById('output').innerHTML = `🌟 จบเกม! ${playerName}<br>คะแนน: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button><div id="leaderboard"></div>`;
+            fetchLeaderboard();
+        });
         return;
     }
     let q = questions[stage];
@@ -83,13 +97,13 @@
   function answer(i) {
     let q = questions[stage];
     let isCorrect = (i === q.ans);
-    let message = isCorrect ? "✅ ถูกต้องนะ!" : "❌ ผิดน้า... คำตอบคือ: " + q.options[q.ans];
-    document.getElementById('output').innerHTML = `<p>${message}</p>`;
+    document.getElementById('output').innerHTML = `<p>${isCorrect ? "✅ ถูกต้อง!" : "❌ ผิดน้า.. ตอบ: "+q.options[q.ans]}</p>`;
     if (isCorrect) score += 25; else hp -= 1;
-    setTimeout(() => { stage++; showQuestion(); }, 2000);
+    setTimeout(() => { stage++; showQuestion(); }, 1500); // ดีเลย์ 1.5 วินาที
   }
 
-  window.onload = showLeaderboard;
+  // โหลดอันดับทันทีที่เปิดหน้าเว็บ
+  fetchLeaderboard();
 </script>
 </body>
 </html>
