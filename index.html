@@ -92,4 +92,42 @@
   }
 
   function showQuestion() {
-    if (hp <= 0
+    if (hp <= 0 || stage >= questions.length) {
+        let finalScore = score + (hp * 10);
+        document.getElementById('output').innerHTML = "⏳ กำลังบันทึกคะแนน...";
+        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ name: playerName, score: finalScore }) })
+        .then(() => {
+            document.getElementById('output').innerHTML = `🌟 จบเกม! ${playerName}<br>คะแนน: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button><div id="leaderboard"></div>`;
+            fetchLeaderboard();
+        });
+        return;
+    }
+    startTime = Date.now();
+    let q = questions[stage];
+    let html = `<p>${q.q}</p><div class="btn-grid">`;
+    q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
+    document.getElementById('output').innerHTML = html + `</div>`;
+    document.getElementById('status').innerText = "HP: " + "💖".repeat(hp) + " | Score: " + score;
+  }
+
+  function answer(i) {
+    let q = questions[stage];
+    let isCorrect = (i === q.ans);
+    let timeTaken = (Date.now() - startTime) / 1000;
+    
+    if (isCorrect) {
+        let bonus = Math.max(0, 10 - Math.floor(timeTaken)); 
+        let points = 25 + (bonus * 5);
+        score += points;
+        document.getElementById('output').innerHTML = `<p>✅ ถูกต้อง! (+${points} คะแนน)</p>`;
+    } else {
+        hp -= 1;
+        document.getElementById('output').innerHTML = `<p>❌ ผิดน้า... ตอบ: ${q.options[q.ans]}</p>`;
+    }
+    setTimeout(() => { stage++; showQuestion(); }, 1500);
+  }
+
+  window.onload = fetchLeaderboard;
+</script>
+</body>
+</html>
