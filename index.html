@@ -31,16 +31,16 @@
 </div>
 
 <script>
-  // บรรทัดข้างล่างนี้: ให้เอา URL ที่ได้จาก Google Apps Script มาใส่ครับ
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysKlWGeikeU2qkkDxKXDcxLHBqqQkn2y76d96zv0SVhBYTWCQIi-P23QlXFOy1RpBknw/exec"; 
+  // --- เปลี่ยน URL ตรงนี้เป็นลิงก์ Web App ของคุณ ---
+  const SCRIPT_URL = "ใhttps://script.google.com/macros/s/AKfycbz_t8A53gWq0F3TKu8l8o63dJ6SCYl6Cp_lvHv8eLtHHOKaKrmUPa-_NnnkpuOLM72MMA/exec"; 
 
-  let stage = 0; let hp = 3; let score = 0; let playerName = "";
+  let stage = 0; let hp = 3; let score = 0; let playerName = ""; let startTime = 0;
   const questions = [
     { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
     { q: "ท่อที่นำปัสสาวะไปกระเพาะปัสสาวะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
     { q: "กระเพาะปัสสาวะมีหน้าที่?", options: ["ผลิตฮอร์โมน", "กรองเลือด", "กักเก็บปัสสาวะ", "ย่อยอาหาร"], ans: 2 },
     { q: "ท่อสุดท้ายที่นำปัสสาวะออกคือ?", options: ["ท่อปัสสาวะ", "ลำไส้ใหญ่", "ท่อไต", "เส้นเลือด"], ans: 0 },
-    { q: "หน่วยกรองจิ๋วในไตชื่อว่า?", options: ["ถุงลม", "ตับอ่อน", "หน่วยไต", "กระเพาะ"], ans: 2 },
+    { q: "หน่วยกรองจิ๋วในไตชื่อว่า?", options: ["ถุงลม", "ตับอ่อน", "หน่วยไต", "กระเปาะ"], ans: 2 },
     { q: "สารที่ไม่ควรมีในปัสสาวะปกติ?", options: ["น้ำ", "โปรตีน/น้ำตาล", "เกลือแร่", "ยูเรีย"], ans: 1 },
     { q: "โรคที่มีน้ำตาลในปัสสาวะ?", options: ["เบาหวาน", "หัวใจ", "ตับ", "กระดูก"], ans: 0 },
     { q: "ปัสสาวะมีน้ำเป็นส่วนประกอบกี่ %?", options: ["50%", "75%", "85%", "95%"], ans: 3 },
@@ -50,7 +50,6 @@
     { q: "พฤติกรรมใดช่วยลดความเสี่ยงโรคนิ่ว?", options: ["ดื่มน้ำสะอาดเยอะๆ", "กินเค็ม", "งดผัก", "อั้นปัสสาวะนานๆ"], ans: 0 }
   ];
 
-  // ฟังก์ชันดึงคะแนนออนไลน์
   function fetchLeaderboard() {
       fetch(SCRIPT_URL)
       .then(res => res.json())
@@ -62,7 +61,7 @@
               html += `<div class="lb-item"><span>${i+1}. ${s.name}</span> <span>${s.score}</span></div>`;
           });
           document.getElementById('leaderboard').innerHTML = html;
-      }).catch(err => document.getElementById('leaderboard').innerHTML = "โหลดคะแนนไม่สำเร็จ");
+      }).catch(() => document.getElementById('leaderboard').innerHTML = "โหลดคะแนนไม่สำเร็จ");
   }
 
   function startGame() {
@@ -75,18 +74,15 @@
   function showQuestion() {
     if (hp <= 0 || stage >= questions.length) {
         let finalScore = score + (hp * 10);
-        document.getElementById('output').innerHTML = "⏳ กำลังบันทึกคะแนนออนไลน์...";
-        
-        // ส่งคะแนนไป Google Sheets
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ name: playerName, score: finalScore })
-        }).then(() => {
+        document.getElementById('output').innerHTML = "⏳ กำลังบันทึกคะแนน...";
+        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ name: playerName, score: finalScore }) })
+        .then(() => {
             document.getElementById('output').innerHTML = `🌟 จบเกม! ${playerName}<br>คะแนน: ${finalScore}<br><br><button onclick='location.reload()'>เล่นอีกรอบ</button><div id="leaderboard"></div>`;
             fetchLeaderboard();
         });
         return;
     }
+    startTime = Date.now(); // บันทึกเวลาเริ่มข้อ
     let q = questions[stage];
     let html = `<p>${q.q}</p><div class="btn-grid">`;
     q.options.forEach((o, i) => html += `<button onclick="answer(${i})">${o}</button>`);
@@ -97,13 +93,21 @@
   function answer(i) {
     let q = questions[stage];
     let isCorrect = (i === q.ans);
-    document.getElementById('output').innerHTML = `<p>${isCorrect ? "✅ ถูกต้อง!" : "❌ ผิดน้า.. ตอบ: "+q.options[q.ans]}</p>`;
-    if (isCorrect) score += 25; else hp -= 1;
-    setTimeout(() => { stage++; showQuestion(); }, 1500); // ดีเลย์ 1.5 วินาที
+    let timeTaken = (Date.now() - startTime) / 1000;
+    
+    if (isCorrect) {
+        let bonus = Math.max(0, 10 - Math.floor(timeTaken)); 
+        let points = 25 + (bonus * 5);
+        score += points;
+        document.getElementById('output').innerHTML = `<p>✅ ถูกต้อง! (+${points} คะแนน)</p>`;
+    } else {
+        hp -= 1;
+        document.getElementById('output').innerHTML = `<p>❌ ผิดน้า... ตอบ: ${q.options[q.ans]}</p>`;
+    }
+    setTimeout(() => { stage++; showQuestion(); }, 1500);
   }
 
-  // โหลดอันดับทันทีที่เปิดหน้าเว็บ
-  fetchLeaderboard();
+  window.onload = fetchLeaderboard;
 </script>
 </body>
 </html>
