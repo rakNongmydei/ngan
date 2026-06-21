@@ -112,3 +112,5 @@ def play_game():
 
 if __name__ == "__main__":
   python game.py
+    render.yaml
+      
