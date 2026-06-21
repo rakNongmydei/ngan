@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เกมผจญภัยระบบปัสสาวะ</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; background-color: #f0f8ff; }
+        #game-box { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <h1>ระบบปัสสาวะผจญภัย</h1>
+    <div id="output">กดปุ่มเริ่มเกมเพื่อเล่น</div>
+    <br>
+    <input type="text" id="answer" placeholder="ใส่คำตอบ (A, B, หรือ C)">
+    <button onclick="nextStep()">ส่งคำตอบ</button>
+</div>
+
+<script>
+    let stage = 0;
+    let hp = 3;
+    let score = 0;
+
+    function nextStep() {
+        let ans = document.getElementById('answer').value.toUpperCase();
+        let output = document.getElementById('output');
+        
+        if (stage === 0) {
+            output.innerHTML = "ด่านที่ 1: ไตทำหน้าที่อะไร?<br>A) ย่อยอาหาร B) กรองของเสีย C) ปั๊มเลือด";
+            stage = 1;
+        } else if (stage === 1) {
+            if (ans === 'B') score += 25; else hp -= 1;
+            output.innerHTML = "ด่านที่ 2: ท่อที่นำปัสสาวะไปกระเพาะปัสสาวะคือ?<br>A) ท่อไต B) หลอดอาหาร C) หลอดลม<br>(HP เหลือ: " + hp + ")";
+            stage = 2;
+        } else if (stage === 2) {
+            if (ans === 'A') score += 25; else hp -= 1;
+            output.innerHTML = "ด่านที่ 3: กระเพาะปัสสาวะทำหน้าที่อะไร?<br>A) ย่อย B) ผลิตฮอร์โมน C) กักเก็บปัสสาวะ<br>(HP เหลือ: " + hp + ")";
+            stage = 3;
+        } else if (stage === 3) {
+            if (ans === 'C') score += 25; else hp -= 1;
+            output.innerHTML = "ด่านที่ 4: ท่อสุดท้ายที่นำปัสสาวะออกคือ?<br>A) ท่อปัสสาวะ B) ลำไส้ C) เส้นเลือด<br>(HP เหลือ: " + hp + ")";
+            stage = 4;
+        } else {
+            if (ans === 'A') score += 25; else hp -= 1;
+            output.innerHTML = "จบเกม! คะแนนของคุณคือ: " + (score + (hp * 5));
+        }
+        document.getElementById('answer').value = '';
+    }
+</script>
+
+</body>
+</html>
