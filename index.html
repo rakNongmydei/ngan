@@ -50,7 +50,11 @@
 
   function toggleMusic() { let m = document.getElementById("bgMusic"); m.paused ? m.play() : m.pause(); }
   function changeVolume(v) { let m = document.getElementById("bgMusic"); m.volume = Math.min(Math.max(m.volume + v, 0), 1); }
-  function startGame() { stage = 0; hp = 3; score = 0; showQuestion(); }
+  function startGame() { stage = 0; hp = 3; score = 0; 
+                        let music = document.getElementById("bgMusic");
+    music.play().catch(error => console.log("รอการคลิกจากผู้ใช้"));
+                        
+                        showQuestion(); }
   function showQuestion() {
     if (hp <= 0) { document.getElementById('output').innerHTML = "💀 จบเกมแล้ว! คะแนน: " + score + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
     if (stage >= questions.length) { document.getElementById('output').innerHTML = "🌟 ยอดเยี่ยม! คะแนน: " + (score + (hp * 10)) + "<br><br><button onclick='location.reload()'>เริ่มใหม่</button>"; return; }
