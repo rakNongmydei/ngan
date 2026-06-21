@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Cute Urinary Quest 💧</title>
-    </head>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #ffeef2; padding: 20px; }
+        #game-box { background: white; padding: 20px; border-radius: 20px; max-width: 400px; margin: auto; border: 3px solid #ffb7c5; }
+        .btn-grid { display: grid; gap: 10px; margin-top: 15px; }
+        button { padding: 10px; cursor: pointer; }
+    </style>
+</head>
 <body>
 
 <div id="game-box">
@@ -15,6 +21,8 @@
     <div id="status"></div>
     <br>
     <button onclick="toggleMusic()">🎵 เปิด/ปิด เพลง</button>
+    <button onclick="changeVolume(-0.1)">🔊 -</button>
+    <button onclick="changeVolume(0.1)">🔊 +</button>
 </div>
 
 <audio id="bgMusic" loop>
@@ -22,15 +30,66 @@
 </audio>
 
 <script>
-    // โค้ด JavaScript ของคุณทั้งหมด
-    let stage = 0; let hp = 3; let score = 0;
-    const questions = [ /* ... (คำถามของคุณ) ... */ ];
-    
-    function toggleMusic() {
-        let music = document.getElementById("bgMusic");
-        music.paused ? music.play() : music.pause();
+  let stage = 0;
+  let hp = 3;
+  let score = 0;
+  const questions = [
+    { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
+    { q: "ท่อที่นำปัสสาวะไปกระเพาะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
+    { q: "กระเพาะปัสสาวะมีหน้าที่?", options: ["ผลิตฮอร์โมน", "กรองเลือด", "กักเก็บปัสสาวะ", "ย่อยอาหาร"], ans: 2 },
+    { q: "ท่อสุดท้ายที่นำปัสสาวะออกคือ?", options: ["ท่อปัสสาวะ", "ลำไส้ใหญ่", "ท่อไต", "เส้นเลือด"], ans: 0 },
+    { q: "หน่วยกรองจิ๋วในไตชื่อว่า?", options: ["ถุงลม", "ตับอ่อน", "หน่วยไต", "กระเพาะ"], ans: 2 },
+    { q: "สารที่ไม่ควรมีในปัสสาวะปกติ?", options: ["น้ำ", "โปรตีน/น้ำตาล", "เกลือแร่", "ยูเรีย"], ans: 1 },
+    { q: "โรคที่มีน้ำตาลในปัสสาวะ?", options: ["เบาหวาน", "หัวใจ", "ตับ", "กระดูก"], ans: 0 },
+    { q: "ปัสสาวะมีน้ำเป็นส่วนประกอบกี่ %?", options: ["50%", "75%", "85%", "95%"], ans: 3 },
+    { q: "ดื่มน้ำน้อยเสี่ยงเป็นโรคอะไร?", options: ["นิ่วในไต", "เบาหวาน", "กระดูกพรุน", "ตับอักเสบ"], ans: 0 }
+  ];
+
+  function toggleMusic() {
+    let music = document.getElementById("bgMusic");
+    music.paused ? music.play() : music.pause();
+  }
+
+  function changeVolume(amount) {
+    let music = document.getElementById("bgMusic");
+    let newVolume = music.volume + amount;
+    if (newVolume > 1) newVolume = 1;
+    if (newVolume < 0) newVolume = 0;
+    music.volume = newVolume;
+  }
+
+  function startGame() {
+    stage = 0;
+    hp = 3;
+    score = 0;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    if (hp <= 0) {
+      document.getElementById('output').innerHTML = "💀 โอ๊ะโอ! พลังชีวิตหมดแล้ว<br>คะแนนรวม: " + score + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
+      return;
     }
-    // ... (ฟังก์ชันอื่นๆ ของคุณ) ...
+    if (stage >= questions.length) {
+      document.getElementById('output').innerHTML = "🌟 ยินดีด้วยค่ะ! เก่งมาก<br>คะแนนรวม: " + (score + (hp * 10)) + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
+      return;
+    }
+    let qData = questions[stage];
+    let html = `<p class="q-box">${qData.q}</p><div class="btn-grid">`;
+    qData.options.forEach((opt, i) => {
+      html += `<button onclick="answer(${i})">${opt}</button>`;
+    });
+    html += `</div>`;
+    document.getElementById('output').innerHTML = html;
+    document.getElementById('status').innerText = "HP: " + "❤️".repeat(hp) + " | Score: " + score;
+  }
+
+  function answer(idx) {
+    if (idx === questions[stage].ans) score += 25;
+    else hp -= 1;
+    stage++;
+    showQuestion();
+  }
 </script>
 
 </body>
