@@ -1,95 +1,66 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>Cute Urinary Quest 💧</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&family=Press+Start+2P&display=swap');
-        body { background: #ffeef2; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Kanit', sans-serif; }
-        #game-box { width: 90%; max-width: 500px; background: #fff; padding: 30px; border-radius: 25px; box-shadow: 0 10px 20px rgba(255,150,170,0.3); text-align: center; border: 5px solid #ffb7c5; }
-        h1 { font-family: 'Press Start 2P', cursive; font-size: 18px; color: #ff6b8d; margin-bottom: 20px; }
-        .q-box { font-size: 18px; margin-bottom: 25px; color: #555; }
-        .btn-grid { display: grid; gap: 10px; }
-        button { background: #ffccd5; border: none; padding: 15px; border-radius: 15px; cursor: pointer; font-family: 'Kanit'; font-size: 16px; color: #d63384; transition: 0.3s; }
-        button:hover { background: #ff9fb3; color: white; }
-        #status { margin-top: 20px; font-size: 14px; color: #ff85a2; }
-    </style>
-</head>
-<body>
-
-<div id="game-box">
-    <h1>URINARY QUEST 💧</h1>
-    <div id="output">
-        <p class="q-box">พร้อมผจญภัยกับโมเลกุลน้ำจิ๋วหรือยังคะ?</p>
-        <button onclick="startGame()">เริ่มเล่นเล้ย!</button>
-    </div>
-    <div id="status"></div>
-    <br>
-    <button onclick="toggleMusic()" style="font-size: 12px; padding: 5px;">🎵 เปิด/ปิด เพลง</button>
-    <div style="margin-top: 10px;">
-        <button onclick="changeVolume(-0.1)" style="padding: 5px 10px; font-size: 12px;">🔊 -</button>
-        <button onclick="changeVolume(0.1)" style="padding: 5px 10px; font-size: 12px;">🔊 +</button>
-    </div>
-</div>
-
-<audio id="bgMusic" loop>
-   <source src="https://drive.google.com/drive/u/0/home" type="audio/mpeg">
-</audio>
-
 <script>
-    let stage = 0; let hp = 3; let score = 0;
-    const questions = [
-        { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
-        { q: "ท่อที่นำปัสสาวะไปกระเพาะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
-        { q: "กระเพาะปัสสาวะมีหน้าที่?", options: ["ผลิตฮอร์โมน", "กรองเลือด", "กักเก็บปัสสาวะ", "ย่อยอาหาร"], ans: 2 },
-        { q: "ท่อสุดท้ายที่นำปัสสาวะออกคือ?", options: ["ท่อปัสสาวะ", "ลำไส้ใหญ่", "ท่อไต", "เส้นเลือด"], ans: 0 },
-        { q: "หน่วยกรองจิ๋วในไตชื่อว่า?", options: ["ถุงลม", "ตับอ่อน", "หน่วยไต", "กระเพาะ"], ans: 2 },
-        { q: "สารที่ไม่ควรมีในปัสสาวะปกติ?", options: ["น้ำ", "โปรตีน/น้ำตาล", "เกลือแร่", "ยูเรีย"], ans: 1 },
-        { q: "โรคที่มีน้ำตาลในปัสสาวะ?", options: ["เบาหวาน", "หัวใจ", "ตับ", "กระดูก"], ans: 0 },
-        { q: "ปัสสาวะมีน้ำเป็นส่วนประกอบกี่ %?", options: ["50%", "75%", "85%", "95%"], ans: 3 },
-        { q: "ดื่มน้ำน้อยเสี่ยงเป็นโรคอะไร?", options: ["นิ่วในไต", "เบาหวาน", "กระดูกพรุน", "ตับอักเสบ"], ans: 0 }
-    ];
+  let stage = 0;
+  let hp = 3;
+  let score = 0;
+  const questions = [
+    { q: "ไตทำหน้าที่อะไรน้า?", options: ["ผลิตน้ำดี", "กรองของเสีย", "ย่อยโปรตีน", "ผลิตเลือด"], ans: 1 },
+    { q: "ท่อที่นำปัสสาวะไปกระเพาะคือ?", options: ["หลอดอาหาร", "ท่อไต", "ท่อปัสสาวะ", "หลอดลม"], ans: 1 },
+    { q: "กระเพาะปัสสาวะมีหน้าที่?", options: ["ผลิตฮอร์โมน", "กรองเลือด", "กักเก็บปัสสาวะ", "ย่อยอาหาร"], ans: 2 },
+    { q: "ท่อสุดท้ายที่นำปัสสาวะออกคือ?", options: ["ท่อปัสสาวะ", "ลำไส้ใหญ่", "ท่อไต", "เส้นเลือด"], ans: 0 },
+    { q: "หน่วยกรองจิ๋วในไตชื่อว่า?", options: ["ถุงลม", "ตับอ่อน", "หน่วยไต", "กระเพาะ"], ans: 2 },
+    { q: "สารที่ไม่ควรมีในปัสสาวะปกติ?", options: ["น้ำ", "โปรตีน/น้ำตาล", "เกลือแร่", "ยูเรีย"], ans: 1 },
+    { q: "โรคที่มีน้ำตาลในปัสสาวะ?", options: ["เบาหวาน", "หัวใจ", "ตับ", "กระดูก"], ans: 0 },
+    { q: "ปัสสาวะมีน้ำเป็นส่วนประกอบกี่ %?", options: ["50%", "75%", "85%", "95%"], ans: 3 },
+    { q: "ดื่มน้ำน้อยเสี่ยงเป็นโรคอะไร?", options: ["นิ่วในไต", "เบาหวาน", "กระดูกพรุน", "ตับอักเสบ"], ans: 0 }
+  ];
 
-    function toggleMusic() {
-        let music = document.getElementById("bgMusic");
-        music.paused ? music.play() : music.pause();
+  function toggleMusic() {
+    let music = document.getElementById("bgMusic");
+    music.paused ? music.play() : music.pause();
+  }
+
+  function changeVolume(amount) {
+    let music = document.getElementById("bgMusic");
+    let newVolume = music.volume + amount;
+    if (newVolume > 1) newVolume = 1;
+    if (newVolume < 0) newVolume = 0;
+    music.volume = newVolume;
+  }
+
+  function startGame() {
+    // สั่งให้เพลงเล่นทันทีเมื่อกดปุ่มเริ่ม
+    let music = document.getElementById("bgMusic");
+    music.play().catch(error => console.log("รอการโต้ตอบจากผู้ใช้ก่อนเริ่มเพลง"));
+    
+    stage = 0;
+    hp = 3;
+    score = 0;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    if (hp <= 0) {
+      document.getElementById('output').innerHTML = "💀 โอ๊ะโอ! พลังชีวิตหมดแล้ว<br>คะแนนรวม: " + score + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
+      return;
     }
-
-    function changeVolume(amount) {
-        let music = document.getElementById("bgMusic");
-        let newVolume = music.volume + amount;
-        if (newVolume > 1) newVolume = 1;
-        if (newVolume < 0) newVolume = 0;
-        music.volume = newVolume;
+    if (stage >= questions.length) {
+      document.getElementById('output').innerHTML = "🌟 ยินดีด้วยค่ะ! เก่งมาก<br>คะแนนรวม: " + (score + (hp * 10)) + "<br><button onclick='location.reload()'>เล่นใหม่</button>";
+      return;
     }
+    let qData = questions[stage];
+    let html = `<p class="q-box">${qData.q}</p><div class="btn-grid">`;
+    qData.options.forEach((opt, i) => {
+      html += `<button onclick="answer(${i})">${opt}</button>`;
+    });
+    html += `</div>`;
+    document.getElementById('output').innerHTML = html;
+    document.getElementById('status').innerText = "HP: " + "❤️".repeat(hp) + " | Score: " + score;
+  }
 
-    function startGame() { stage = 0; hp = 3; score = 0; showQuestion(); }
-
-    function showQuestion() {
-        if (hp <= 0) {
-            document.getElementById('output').innerHTML = "💀 โอ๊ะโอ! พลังชีวิตหมดแล้ว<br>คะแนนรวม: " + score;
-            return;
-        }
-        if (stage >= questions.length) {
-            document.getElementById('output').innerHTML = "🌟 ยินดีด้วยค่ะ! เก่งมาก<br>คะแนนรวม: " + (score + (hp * 10));
-            return;
-        }
-
-        let qData = questions[stage];
-        let html = `<p class="q-box">${qData.q}</p><div class="btn-grid">`;
-        qData.options.forEach((opt, i) => {
-            html += `<button onclick="answer(${i})">${opt}</button>`;
-        });
-        html += `</div>`;
-        document.getElementById('output').innerHTML = html;
-        document.getElementById('status').innerText = "HP: " + "❤️".repeat(hp) + " | Score: " + score;
-    }
-
-    function answer(idx) {
-        if (idx === questions[stage].ans) score += 25; else hp -= 1;
-        stage++;
-        showQuestion();
-    }
+  function answer(idx) {
+    if (idx === questions[stage].ans) score += 25;
+    else hp -= 1;
+    stage++;
+    showQuestion();
+  }
 </script>
-</body>
-</html>
