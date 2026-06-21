@@ -25,11 +25,15 @@
     </div>
     <div id="status"></div>
     <br>
-    <button onclick="toggleMusic()" style="font-size: 10px; padding: 5px;">🎵 เปิด/ปิด เพลง</button>
+    <button onclick="toggleMusic()" style="font-size: 12px; padding: 5px;">🎵 เปิด/ปิด เพลง</button>
+    <div style="margin-top: 10px;">
+        <button onclick="changeVolume(-0.1)" style="padding: 5px 10px; font-size: 12px;">🔊 -</button>
+        <button onclick="changeVolume(0.1)" style="padding: 5px 10px; font-size: 12px;">🔊 +</button>
+    </div>
 </div>
 
 <audio id="bgMusic" loop>
-    <source src="https://pixabay.com/th/music/%E0%B8%A7%E0%B8%94%E0%B9%82%E0%B8%AD%E0%B9%80%E0%B8%81%E0%B8%A1-winter-pixel-422896/" type="audio/mpeg">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -49,6 +53,14 @@
     function toggleMusic() {
         let music = document.getElementById("bgMusic");
         music.paused ? music.play() : music.pause();
+    }
+
+    function changeVolume(amount) {
+        let music = document.getElementById("bgMusic");
+        let newVolume = music.volume + amount;
+        if (newVolume > 1) newVolume = 1;
+        if (newVolume < 0) newVolume = 0;
+        music.volume = newVolume;
     }
 
     function startGame() { stage = 0; hp = 3; score = 0; showQuestion(); }
