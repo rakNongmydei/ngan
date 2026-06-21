@@ -111,4 +111,4 @@ def play_game():
         save_high_score(player_name, final_score)
 
 if __name__ == "__main__":
-    play_game()
+  python game.py
